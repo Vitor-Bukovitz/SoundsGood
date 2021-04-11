@@ -28,6 +28,7 @@
 		8DC4A200260ADEFE00D12E97 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8DC4A1FE260ADEFE00D12E97 /* LaunchScreen.storyboard */; };
 		8DC4A20B260AE00D00D12E97 /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4A20A260AE00D00D12E97 /* HomeVC.swift */; };
 		8DC4EA16262284E500C8068F /* SGButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4EA15262284E500C8068F /* SGButton.swift */; };
+		8DC4EA1A26228D3200C8068F /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4EA1926228D3200C8068F /* UIImage+Ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		8DC4A201260ADEFE00D12E97 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC4A20A260AE00D00D12E97 /* HomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeVC.swift; sourceTree = "<group>"; };
 		8DC4EA15262284E500C8068F /* SGButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SGButton.swift; sourceTree = "<group>"; };
+		8DC4EA1926228D3200C8068F /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				8D428360261136F1006263E2 /* UIViewController+Ext.swift */,
+				8DC4EA1926228D3200C8068F /* UIImage+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				8D428361261136F1006263E2 /* UIViewController+Ext.swift in Sources */,
 				8D42835D2611341D006263E2 /* YoutubeResult.swift in Sources */,
 				8D981DEC260EF75300F49C9F /* SGError.swift in Sources */,
+				8DC4EA1A26228D3200C8068F /* UIImage+Ext.swift in Sources */,
 				8D25AECE260FD56800B1128F /* SGTitleLabel.swift in Sources */,
 				8DC4EA16262284E500C8068F /* SGButton.swift in Sources */,
 				8D981DE8260EF68900F49C9F /* Song.swift in Sources */,

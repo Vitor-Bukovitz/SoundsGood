@@ -27,15 +27,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func createHomeNC() -> UINavigationController {
         let homeVC = HomeVC()
         homeVC.title = "Your Songs"
-        homeVC.tabBarItem = UITabBarItem(title: "Menu", image: UIImage(named: "menu-icon"), tag: 0)
+        homeVC.tabBarItem = UITabBarItem(title: "Menu", image: UIImage.menuIcon, tag: 0)
         return UINavigationController(rootViewController: homeVC)
     }
 
     func createSearchNC() -> UINavigationController {
-        #warning("Change here to searchVC")
         let searchVC = SearchVC()
         searchVC.title = "Youtube Search"
-        searchVC.tabBarItem = UITabBarItem(title: "Youtube Search", image: UIImage(named: "search-icon"), tag: 1)
+        searchVC.tabBarItem = UITabBarItem(title: "Youtube Search", image: UIImage.searchIcon, tag: 1)
         return UINavigationController(rootViewController: searchVC)
     }
 
