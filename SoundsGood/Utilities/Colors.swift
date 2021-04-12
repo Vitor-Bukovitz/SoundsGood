@@ -10,4 +10,5 @@ import UIKit
 enum Colors {
     static let purpleColor = UIColor(red: 0.30, green: 0.13, blue: 0.59, alpha: 1.0)
     static let whiteColor = UIColor.white
+    static let shadowColor = UIColor.black
 }

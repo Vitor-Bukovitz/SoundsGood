@@ -9,14 +9,17 @@ import UIKit
 
 enum SGButtonType {
     case play
+    case pause
     case skip
     case previous
+    case download
+    case downloaded
 }
 
 class SGButton: UIButton {
     
-    init(type: SGButtonType) {
-        super.init(frame: .zero)
+    convenience init(type: SGButtonType) {
+        self.init(type: .system)
         configure(type)
     }
     
@@ -29,13 +32,28 @@ class SGButton: UIButton {
     }
     
     private func configure(_ type: SGButtonType) {
+        translatesAutoresizingMaskIntoConstraints = false
         switch type {
         case .play:
-            imageView?.image = UIImage.playIcon
+            setImage(UIImage.playIcon, for: .normal)
+        case .pause:
+            setImage(UIImage.pauseIcon, for: .normal)
         case .skip:
-            imageView?.image = UIImage.skipIcon
+            setImage(UIImage.skipIcon, for: .normal)
         case .previous:
-            imageView?.image = UIImage.previousIcon
+            setImage(UIImage.previousIcon, for: .normal)
+        case .download:
+            setImage(UIImage.downloadIcon, for: .normal)
+        case .downloaded:
+            setImage(UIImage.downloadedIcon, for: .normal)
         }
+    }
+    
+    func toggleIcon(to type: SGButtonType) {
+        configure(type)
+    }
+    
+    func checkIsDownloaded(song: Song) {
+        
     }
 }

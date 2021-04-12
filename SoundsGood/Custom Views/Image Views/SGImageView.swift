@@ -22,6 +22,7 @@ class SGImageView: UIImageView {
         layer.cornerRadius = 8
         clipsToBounds = true
         translatesAutoresizingMaskIntoConstraints = false
+        contentMode = .scaleAspectFill
     }
     
     func setRemoteImage(url: String) {

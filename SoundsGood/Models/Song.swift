@@ -7,25 +7,25 @@
 
 import Foundation
 
-struct Song: Codable {
+struct Song: Codable, Hashable {
     let snippet: Snippet
     let id: Id
 }
 
-struct Snippet: Codable {
+struct Snippet: Codable, Hashable {
     let title: String
     let channelTitle: String
     let thumbnails: Thumbnails
 }
 
-struct Thumbnails: Codable {
-    let high: High
+struct Thumbnails: Codable, Hashable {
+    let medium: Medium
 }
 
-struct High: Codable {
+struct Medium: Codable, Hashable {
     let url: String
 }
 
-struct Id: Codable {
+struct Id: Codable, Hashable {
     let videoId: String?
 }

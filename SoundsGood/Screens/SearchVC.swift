@@ -10,8 +10,9 @@ import MediaPlayer
 
 class SearchVC: UIViewController {
     
-    let tableView = UITableView()
-    var songs = [Song]()
+    private let tableView = UITableView()
+    private let playerBar = PlayerBarView()
+    private var songs = [Song]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,6 +20,7 @@ class SearchVC: UIViewController {
         view.backgroundColor = Colors.whiteColor
         configureSearchController()
         configureTableVC()
+        configurePlayerBar()
     }
 
     private func configureTableVC() {
@@ -27,8 +29,21 @@ class SearchVC: UIViewController {
         tableView.frame = view.bounds
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(SongCell.self, forCellReuseIdentifier: SongCell.reuseID)
         tableView.rowHeight = 60
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 64, right: 0)
+        tableView.register(SongCell.self, forCellReuseIdentifier: SongCell.reuseID)
+    }
+    
+    private func configurePlayerBar() {
+        view.addSubview(playerBar)
+        
+        playerBar.controller = self
+        NSLayoutConstraint.activate([
+            playerBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            playerBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            playerBar.heightAnchor.constraint(equalToConstant: 64),
+        ])
     }
     
     private func configureSearchController() {
@@ -48,7 +63,6 @@ class SearchVC: UIViewController {
             self.tableView.reloadData()
         }
     }
-
 }
 
 extension SearchVC: UITableViewDelegate, UITableViewDataSource {

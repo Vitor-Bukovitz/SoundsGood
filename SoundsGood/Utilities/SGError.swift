@@ -13,4 +13,6 @@ enum SGError: String, Error {
     case unableToComplete = "Unable to complete your request. Please check your internet connection."
     case invalidResponse = "Invalid response from the server. Please try again."
     case invalidData = "The data received from the server is invalid. Please try again."
+    case unableToSave = "There was an error saving this song. Please try again."
+    case alreadySaved = "You've already saved this song. You must REALLY like it!"
 }

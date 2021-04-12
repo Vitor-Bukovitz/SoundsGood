@@ -10,12 +10,18 @@ import CoreMedia
 
 class PlayerVC: UIViewController {
 
-    let topImage = SGImageView(frame: .zero)
-    let titleLabel = SGTitleLabel(textAlign: .left, fontSize: 18)
-    let authorLabel = SGBodyLabel()
-    let currentTimeLabel = SGBodyLabel()
-    let durationTimeLabel = SGBodyLabel()
-    let slider = UISlider()
+    private let topImage = SGImageView(frame: .zero)
+    private let titleLabel = SGTitleLabel(textAlign: .left, fontSize: 18)
+    private let authorLabel = SGBodyLabel()
+    private let currentTimeLabel = SGBodyLabel()
+    private let durationTimeLabel = SGBodyLabel()
+    private let slider = UISlider()
+    private let playButton = SGButton(type: .pause)
+    private let skipButton = SGButton(type: .skip)
+    private let previousButton = SGButton(type: .previous)
+    private let downloadButton = SGButton(type: .download)
+    
+    private var song: Song?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,25 +37,34 @@ class PlayerVC: UIViewController {
     }
 
     func setSong(song: Song) {
+        self.song = song
         titleLabel.text = song.snippet.title
         authorLabel.text = song.snippet.channelTitle
-        topImage.setRemoteImage(url: song.snippet.thumbnails.high.url)
+        topImage.setRemoteImage(url: song.snippet.thumbnails.medium.url)
     }
     
     private func configureLayout() {
         view.addSubview(topImage)
         view.addSubview(titleLabel)
+        view.addSubview(downloadButton)
         view.addSubview(authorLabel)
         view.addSubview(slider)
         view.addSubview(currentTimeLabel)
         view.addSubview(durationTimeLabel)
-
+        view.addSubview(playButton)
+        view.addSubview(skipButton)
+        view.addSubview(previousButton)
+        
         titleLabel.numberOfLines = 1
         slider.translatesAutoresizingMaskIntoConstraints = false
         slider.tintColor = Colors.purpleColor
         currentTimeLabel.text = "00:00"
         durationTimeLabel.text = "00:00"
         durationTimeLabel.textAlignment = .right
+        downloadButton.addTarget(self, action: #selector(downloadButtonPressed), for: .touchUpInside)
+        playButton.addTarget(self, action: #selector(playButtonPressed), for: .touchUpInside)
+        previousButton.addTarget(self, action: #selector(previousButtonPressed), for: .touchUpInside)
+        skipButton.addTarget(self, action: #selector(skipButtonPressed), for: .touchUpInside)
 
         
         NSLayoutConstraint.activate([
@@ -58,9 +73,14 @@ class PlayerVC: UIViewController {
             topImage.heightAnchor.constraint(equalToConstant: 220),
             topImage.widthAnchor.constraint(equalToConstant: 220),
             
-            titleLabel.topAnchor.constraint(equalTo: topImage.bottomAnchor, constant: 20),
+            downloadButton.topAnchor.constraint(equalTo: topImage.bottomAnchor, constant: 18),
+            downloadButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            downloadButton.widthAnchor.constraint(equalToConstant: 34),
+            downloadButton.heightAnchor.constraint(equalToConstant: 34),
+            
+            titleLabel.topAnchor.constraint(equalTo: downloadButton.bottomAnchor, constant: 18),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -20),
+            titleLabel.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -18),
             titleLabel.heightAnchor.constraint(equalToConstant: 24),
             
             authorLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
@@ -82,16 +102,80 @@ class PlayerVC: UIViewController {
             durationTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
             durationTimeLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
             durationTimeLabel.heightAnchor.constraint(equalToConstant: 18),
+            
+            
+            playButton.topAnchor.constraint(equalTo: currentTimeLabel.bottomAnchor, constant: 18),
+            playButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            playButton.heightAnchor.constraint(equalToConstant: 68),
+            playButton.widthAnchor.constraint(equalToConstant: 68),
+            
+            previousButton.trailingAnchor.constraint(equalTo: playButton.leadingAnchor, constant: -32),
+            previousButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            previousButton.heightAnchor.constraint(equalToConstant: 34),
+            previousButton.widthAnchor.constraint(equalToConstant: 34),
+            
+            skipButton.leadingAnchor.constraint(equalTo: playButton.trailingAnchor, constant: 32),
+            skipButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
+            skipButton.heightAnchor.constraint(equalToConstant: 34),
+            skipButton.widthAnchor.constraint(equalToConstant: 34),
         ])
     }
+    
+    @objc private func downloadButtonPressed() {
+        guard let song = song else { return }
+        NetworkManager.shared.downloadSong(song: song) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(_):
+                DispatchQueue.main.async {
+                    self.downloadButton.toggleIcon(to: .downloaded)
+                }
+                self.presentAlertOnMainThread(title: "Sucess", message: "Song saved successfully 🎉")
+            case .failure(let error):
+                self.presentAlertOnMainThread(title: "Something went wrong", message: error.rawValue)
+            }
+        }
+    }
+    
+    @objc private func playButtonPressed() {
+        if SongManager.player?.timeControlStatus == .playing {
+            SongManager.player?.pause()
+        } else {
+            SongManager.player?.play()
+        }
+        setButtons()
+    }
+    
+    @objc private func previousButtonPressed() {
+        guard let song = SongManager.playPrevious() else { return }
+        presentSong(song: song)
+    }
+    
+    @objc private func skipButtonPressed() {
+        guard let song = SongManager.playNext() else { return }
+        presentSong(song: song)
+    }
+    
+    private func presentSong(song: Song) {
+        let pvc = self.presentingViewController
+        let destVC = PlayerVC()
+        destVC.setSong(song: song)
+        let navController = UINavigationController(rootViewController: destVC)
+        dismiss(animated: true) {
+            pvc?.present(navController, animated: true)
+        }
+    }
+    
     
     private func sliderObserver() {
         slider.addAction(UIAction(handler: onSliderTouched), for: .touchDown)
         slider.addAction(UIAction(handler: onSliderEnd), for: .touchUpInside)
         slider.addAction(UIAction(handler: onSliderChanged), for: .valueChanged)
+        SongManager.delegate = self
         SongManager.player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: .max), queue: DispatchQueue.main, using: { time in
-            let currentSeconds = SongManager.player?.currentTime().seconds ?? 0
-            guard let totalSeconds = SongManager.player?.currentItem?.duration.seconds, totalSeconds >= 0 else { return }
+            self.setButtons()
+            let currentSeconds = SongManager.currentSeconds()
+            let totalSeconds = SongManager.totalSeconds()
             self.slider.setValue(Float((round(currentSeconds) / round(totalSeconds))), animated: true)
             
             let currentSecondsText = self.formatNumber(value: currentSeconds, type: .seconds)
@@ -105,18 +189,28 @@ class PlayerVC: UIViewController {
         })
     }
     
+    private func setButtons() {
+        if SongManager.player?.timeControlStatus == .playing {
+            playButton.toggleIcon(to: .pause)
+        } else {
+            playButton.toggleIcon(to: .play)
+        }
+        skipButton.isEnabled = SongManager.canPlayNext()
+        previousButton.isEnabled = SongManager.canPlayPrevious()
+    }
+    
     private func onSliderTouched(action: UIAction) {
         SongManager.player?.pause()
     }
 
     private func onSliderEnd(action: UIAction) {
-        guard let totalSeconds = SongManager.player?.currentItem?.duration.seconds, totalSeconds >= 0 else { return }
+        let totalSeconds = SongManager.totalSeconds()
         SongManager.player?.currentItem?.seek(to: CMTime(seconds: round(totalSeconds * Double(slider.value)), preferredTimescale: .max), toleranceBefore: .zero, toleranceAfter: .zero, completionHandler: nil)
         SongManager.player?.play()
     }
     
     private func onSliderChanged(action: UIAction) {
-        guard let totalSeconds = SongManager.player?.currentItem?.duration.seconds, totalSeconds >= 0 else { return }
+        let totalSeconds = SongManager.totalSeconds()
         let selectedSeconds = round(totalSeconds * Double(slider.value))
         let currentSecondsText = formatNumber(value: selectedSeconds, type: .seconds)
         let currentMinutesText = formatNumber(value: selectedSeconds, type: .minutes)
@@ -146,5 +240,12 @@ class PlayerVC: UIViewController {
 
     @objc private func dismissVC() {
         dismiss(animated: true)
+    }
+}
+
+extension PlayerVC: SongManagerDelegate {
+    
+    func onNextSong(nextSong: Song) {
+        presentSong(song: nextSong)
     }
 }

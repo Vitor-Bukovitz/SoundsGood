@@ -29,6 +29,7 @@
 		8DC4A20B260AE00D00D12E97 /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4A20A260AE00D00D12E97 /* HomeVC.swift */; };
 		8DC4EA16262284E500C8068F /* SGButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4EA15262284E500C8068F /* SGButton.swift */; };
 		8DC4EA1A26228D3200C8068F /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4EA1926228D3200C8068F /* UIImage+Ext.swift */; };
+		8DC4EA222622CBA100C8068F /* PlayerBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4EA212622CBA100C8068F /* PlayerBarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		8DC4A20A260AE00D00D12E97 /* HomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeVC.swift; sourceTree = "<group>"; };
 		8DC4EA15262284E500C8068F /* SGButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SGButton.swift; sourceTree = "<group>"; };
 		8DC4EA1926228D3200C8068F /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
+		8DC4EA212622CBA100C8068F /* PlayerBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerBarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 		8D044779260EDF7D002C2750 /* Custom Views */ = {
 			isa = PBXGroup;
 			children = (
+				8DC4EA1C2622CB6A00C8068F /* Views */,
 				8DC4EA14262284BD00C8068F /* Buttons */,
 				8D25AED4260FDA8600B1128F /* Image Views */,
 				8D25AECC260FD52700B1128F /* Labels */,
@@ -192,6 +195,14 @@
 			path = Buttons;
 			sourceTree = "<group>";
 		};
+		8DC4EA1C2622CB6A00C8068F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8DC4EA212622CBA100C8068F /* PlayerBarView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		8DE81A4D260EC823008BD9B4 /* Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -279,6 +290,7 @@
 				8D981DEC260EF75300F49C9F /* SGError.swift in Sources */,
 				8DC4EA1A26228D3200C8068F /* UIImage+Ext.swift in Sources */,
 				8D25AECE260FD56800B1128F /* SGTitleLabel.swift in Sources */,
+				8DC4EA222622CBA100C8068F /* PlayerBarView.swift in Sources */,
 				8DC4EA16262284E500C8068F /* SGButton.swift in Sources */,
 				8D981DE8260EF68900F49C9F /* Song.swift in Sources */,
 				8D25AED6260FDA9700B1128F /* SGImageView.swift in Sources */,
@@ -437,6 +449,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = me.bukovitz.SoundsGood;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -456,6 +469,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = me.bukovitz.SoundsGood;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

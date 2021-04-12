@@ -27,7 +27,7 @@ class SongCell: UITableViewCell {
     func set(song: Song) {
         titleLabel.text = song.snippet.title
         authorLabel.text = song.snippet.channelTitle
-        leadingImage.setRemoteImage(url: song.snippet.thumbnails.high.url)
+        leadingImage.setRemoteImage(url: song.snippet.thumbnails.medium.url)
     }
     
     private func configure() {

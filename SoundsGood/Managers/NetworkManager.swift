@@ -13,6 +13,7 @@ class NetworkManager {
 
     let cache = NSCache<NSString, UIImage>()
 
+    private let apiBaseUrl = "https://vitorbukovitz.pythonanywhere.com/song/"
     private let baseUrl = "https://www.googleapis.com/youtube/v3/search?key=\(ApiKeys.youtube)&maxResults=50&part=snippet"
     
     func searchSong(song: String, completed: @escaping (Result<[Song], SGError>)  -> Void) {
@@ -22,7 +23,7 @@ class NetworkManager {
             return completed(.failure(.invalidSong))
         }
         
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        URLSession.shared.dataTask(with: url) { data, response, error in
             if let _ = error {
                 return completed (.failure(.unableToComplete))
             }
@@ -39,13 +40,10 @@ class NetworkManager {
                 var youtubeResult = try decoder.decode(YoutubeResult.self, from: data)
                 youtubeResult.items.removeAll { $0.id.videoId == nil }
                 completed(.success(youtubeResult.items))
-            } catch let e {
-                print(e)
+            } catch {
                 completed(.failure(.invalidData))
             }
-        }
-        
-        task.resume()
+        }.resume()
     }
     
     func downloadImage(from urlString: String, completed: @escaping (UIImage?) -> Void) {
@@ -69,25 +67,40 @@ class NetworkManager {
             completed(image)
         }.resume()
     }
-//    
-//    func getSong(id: String, completed: @escaping (Result<Data, SGError>) -> Void) {
-//        guard let url = URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") else {
-//            return completed(.failure(SGError.defaultError))
-//        }
-//        
-//        URLSession.shared.dataTask(with: url) { data, response, error in
-//            if error != nil {
-//                return completed(.failure(SGError.defaultError))
-//            }
-//            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-//                return completed(.failure(SGError.defaultError))
-//            }
-//            guard let data = data else {
-//                return completed(.failure(SGError.defaultError))
-//            }
-//            
-//            completed(.success(data))
-//        }.resume()
-//    }
+    
+    func downloadSong(song: Song, completed: @escaping (Result<URL, SGError>) -> Void) {
+        guard let videoid = song.id.videoId else { return completed(.failure(SGError.invalidData)) }
+        
+        let endpoint = apiBaseUrl + videoid
+        guard let url = URL(string: endpoint) else { return completed(.failure(.invalidSong)) }
+        
+        guard let documentPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.allDomainsMask, true).first else { return }
+        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp4") as String
+        if FileManager.default.fileExists(atPath: destPath) { return completed(.success(URL(fileURLWithPath: destPath))) }
+        
+        URLSession.shared.downloadTask(with: url, completionHandler: { location, urlResponse, error in
+            if let _ = error { return completed (.failure(.unableToComplete)) }
+            guard let location = location else { return completed(.failure(SGError.invalidResponse))}
+            do {
+                try FileManager.default.moveItem(at: location, to: URL(fileURLWithPath: destPath))
+                LocalStorageManager.updateWithSong(song: song, actionType: .add) { error in
+                    if let error = error { completed(.failure(error)) }
+                    completed(.success(URL(fileURLWithPath: destPath)))
+                }
+            } catch {
+                completed(.failure(.invalidData))
+            }
+        }).resume()
+    }
+    
+    func getLocalSongURL(song: Song) -> URL? {
+        guard let videoid = song.id.videoId else { return nil }
+        guard let documentPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.allDomainsMask, true).first else { return nil }
+        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp4") as String
+        if FileManager.default.fileExists(atPath: destPath) {
+            return URL(fileURLWithPath: destPath)
+        }
+        return nil
+    }
 }
 
