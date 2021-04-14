@@ -27,9 +27,14 @@ enum SongManager {
         let currentSong = songs[index]
         currentIndex = index
     
-        guard let videoId = currentSong.id.videoId else { return }
-        guard let url = URL(string: baseUrl + videoId) else { return }
-        player = AVPlayer(url: url)
+        let localUrl = LocalStorageManager.getLocalSongURL(song: currentSong)
+        if let localUrl = localUrl {
+            player = AVPlayer(url: localUrl)
+        } else {
+            guard let videoId = currentSong.id.videoId else { return }
+            guard let url = URL(string: baseUrl + videoId) else { return }
+            player = AVPlayer(url: url)
+        }
         player?.volume = 1.0
         player?.play()
         automaticallyPlayNext()

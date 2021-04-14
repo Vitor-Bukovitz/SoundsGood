@@ -57,7 +57,6 @@ class SearchVC: UIViewController {
     
     
     private func updateData(songs: [Song]) {
-        SongManager.configurePlayer(songs: songs)
         DispatchQueue.main.async {
             self.songs = songs
             self.tableView.reloadData()
@@ -81,6 +80,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        SongManager.configurePlayer(songs: songs)
         SongManager.playSong(index: indexPath.row)
         let song = songs[indexPath.row]
         let destVC = PlayerVC()

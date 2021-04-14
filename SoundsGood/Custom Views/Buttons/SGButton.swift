@@ -54,6 +54,5 @@ class SGButton: UIButton {
     }
     
     func checkIsDownloaded(song: Song) {
-        
     }
 }

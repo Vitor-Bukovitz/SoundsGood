@@ -18,7 +18,6 @@ class HomeVC: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = Colors.whiteColor
         configureTableVC()
-        configureSearchController()
         configurePlayerBar()
     }
     
@@ -38,15 +37,6 @@ class HomeVC: UIViewController {
         tableView.register(SongCell.self, forCellReuseIdentifier: SongCell.reuseID)
     }
     
-    private func configureSearchController() {
-        let searchController = UISearchController()
-        searchController.searchResultsUpdater = self
-        searchController.searchBar.delegate = self
-        searchController.searchBar.placeholder = "Search for a song"
-        searchController.obscuresBackgroundDuringPresentation = false
-        navigationItem.searchController = searchController
-    }
-
     private func configurePlayerBar() {
         view.addSubview(playerBar)
         
@@ -88,23 +78,14 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         cell.set(song: song)
         return cell
     }
-}
-
-extension HomeVC: UISearchResultsUpdating, UISearchBarDelegate {
-
-    func updateSearchResults(for searchController: UISearchController) {
-//        guard let filter = searchController.searchBar.text else { return }
-//        isSearching = true
-//        if filter.isEmpty {
-//            updateData(on: self.followers)
-//        } else {
-//            filteredFollowers = followers.filter { $0.login.lowercased().contains(filter.lowercased()) }
-//            updateData(on: filteredFollowers)
-//        }
-    }
     
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-//        isSearching = false
-//        updateData(on: self.followers)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        SongManager.configurePlayer(songs: songs)
+        SongManager.playSong(index: indexPath.row)
+        let song = songs[indexPath.row]
+        let destVC = PlayerVC()
+        destVC.setSong(song: song)
+        let navControlelr = UINavigationController(rootViewController: destVC)
+        present(navControlelr, animated: true)
     }
 }

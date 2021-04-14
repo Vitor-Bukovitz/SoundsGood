@@ -32,6 +32,7 @@ enum LocalStorageManager {
                     retrieveSongs.append(song)
                 case .remove:
                     retrieveSongs.removeAll {$0.id.videoId == song.id.videoId}
+                    deleteSong(song: song)
                 }
                 completed(saveSongs(song: retrieveSongs))
             case .failure(let error):
@@ -46,8 +47,7 @@ enum LocalStorageManager {
             let decoder = JSONDecoder()
             let songs = try decoder.decode([Song].self, from: songsData)
             completed(.success(songs))
-        } catch let e {
-            print(e)
+        } catch {
             completed(.failure(.defaultError))
         }
     }
@@ -61,5 +61,22 @@ enum LocalStorageManager {
         } catch {
             return SGError.unableToSave
         }
+    }
+    
+    static func getLocalSongURL(song: Song) -> URL? {
+        guard let videoid = song.id.videoId else { return nil }
+        guard let documentPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.allDomainsMask, true).first else { return nil }
+        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp4") as String
+        if FileManager.default.fileExists(atPath: destPath) {
+            return URL(fileURLWithPath: destPath)
+        }
+        return nil
+    }
+    
+    static func deleteSong(song: Song) {
+        guard let videoid = song.id.videoId else { return }
+        guard let documentPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.allDomainsMask, true).first else { return }
+        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp4") as String
+        try? FileManager.default.removeItem(atPath: destPath)
     }
 }

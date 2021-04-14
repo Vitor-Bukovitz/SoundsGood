@@ -92,15 +92,5 @@ class NetworkManager {
             }
         }).resume()
     }
-    
-    func getLocalSongURL(song: Song) -> URL? {
-        guard let videoid = song.id.videoId else { return nil }
-        guard let documentPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.allDomainsMask, true).first else { return nil }
-        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp4") as String
-        if FileManager.default.fileExists(atPath: destPath) {
-            return URL(fileURLWithPath: destPath)
-        }
-        return nil
-    }
 }
 

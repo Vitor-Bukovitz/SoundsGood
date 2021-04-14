@@ -20,12 +20,14 @@ class PlayerVC: UIViewController {
     private let skipButton = SGButton(type: .skip)
     private let previousButton = SGButton(type: .previous)
     private let downloadButton = SGButton(type: .download)
+    private let activityIndicator = UIActivityIndicatorView()
     
     private var song: Song?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
+        configureDownloadButton()
         configureLayout()
         sliderObserver()
     }
@@ -54,13 +56,17 @@ class PlayerVC: UIViewController {
         view.addSubview(playButton)
         view.addSubview(skipButton)
         view.addSubview(previousButton)
+        downloadButton.addSubview(activityIndicator)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        slider.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.numberOfLines = 1
-        slider.translatesAutoresizingMaskIntoConstraints = false
         slider.tintColor = Colors.purpleColor
         currentTimeLabel.text = "00:00"
         durationTimeLabel.text = "00:00"
         durationTimeLabel.textAlignment = .right
+        activityIndicator.color = Colors.purpleColor
+        activityIndicator.hidesWhenStopped = true
         downloadButton.addTarget(self, action: #selector(downloadButtonPressed), for: .touchUpInside)
         playButton.addTarget(self, action: #selector(playButtonPressed), for: .touchUpInside)
         previousButton.addTarget(self, action: #selector(previousButtonPressed), for: .touchUpInside)
@@ -118,21 +124,73 @@ class PlayerVC: UIViewController {
             skipButton.centerYAnchor.constraint(equalTo: playButton.centerYAnchor),
             skipButton.heightAnchor.constraint(equalToConstant: 34),
             skipButton.widthAnchor.constraint(equalToConstant: 34),
+            
+            activityIndicator.centerYAnchor.constraint(equalTo: downloadButton.centerYAnchor),
+            activityIndicator.centerXAnchor.constraint(equalTo: downloadButton.centerXAnchor),
+            activityIndicator.heightAnchor.constraint(equalTo: downloadButton.heightAnchor),
+            activityIndicator.widthAnchor.constraint(equalTo: downloadButton.heightAnchor),
         ])
+    }
+    
+    private func configureDownloadButton() {
+        LocalStorageManager.retrieveSongs { [weak self] result in
+            guard let self = self else { return }
+            guard let song = self.song else { return }
+            switch result {
+            case .success(let songs):
+                if songs.contains(song) {
+                    self.downloadButton.toggleIcon(to: .downloaded)
+                }
+            default:
+                return
+            }
+        }
     }
     
     @objc private func downloadButtonPressed() {
         guard let song = song else { return }
-        NetworkManager.shared.downloadSong(song: song) { [weak self] result in
+        downloadButton.setImage(UIImage(), for: .normal)
+        activityIndicator.startAnimating()
+        LocalStorageManager.retrieveSongs { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(_):
-                DispatchQueue.main.async {
-                    self.downloadButton.toggleIcon(to: .downloaded)
+            case .success(let songs):
+                if songs.contains(song) {
+                    let ac = UIAlertController(title: "Delete song?", message: "Are you sure you want to delete this song?", preferredStyle: .alert)
+                    ac.addAction(UIAlertAction(title: "Yes", style: .default, handler: self.deleteSong))
+                    ac.addAction(UIAlertAction(title: "No", style: .cancel))
+                    DispatchQueue.main.async {
+                        self.present(ac, animated: true)
+                    }
+                } else {
+                    NetworkManager.shared.downloadSong(song: song) { [weak self] result in
+                        guard let self = self else { return }
+                        switch result {
+                        case .success(_):
+                            DispatchQueue.main.async {
+                                self.activityIndicator.stopAnimating()
+                                self.downloadButton.toggleIcon(to: .downloaded)
+                            }
+                            self.presentAlertOnMainThread(title: "Sucess", message: "Song saved successfully 🎉")
+                        case .failure(let error):
+                            self.presentAlertOnMainThread(title: "Something went wrong", message: error.rawValue)
+                        }
+                    }
                 }
-                self.presentAlertOnMainThread(title: "Sucess", message: "Song saved successfully 🎉")
-            case .failure(let error):
+            default:
+                return
+            }
+        }
+    }
+    
+    @objc private func deleteSong(_ sender: UIAlertAction) {
+        guard let song = song else { return }
+        LocalStorageManager.updateWithSong(song: song, actionType: .remove) { [weak self] error in
+            guard let self = self else { return }
+            if let error = error {
                 self.presentAlertOnMainThread(title: "Something went wrong", message: error.rawValue)
+            } else {
+                self.dismiss(animated: true)
             }
         }
     }
