@@ -16,6 +16,7 @@ class PlayerBarView: UIView {
     private let previousButton = SGButton(type: .previous)
     
     weak var controller: UIViewController?
+    weak var delegate: PlayerVCDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -113,6 +114,7 @@ class PlayerBarView: UIView {
         guard let song = SongManager.getCurrentSong() else{ return }
         let destVC = PlayerVC()
         destVC.setSong(song: song)
+        destVC.delegate = delegate
         let navControlelr = UINavigationController(rootViewController: destVC)
         controller?.navigationController?.present(navControlelr, animated: true)
     }

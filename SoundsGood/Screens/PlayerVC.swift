@@ -8,6 +8,10 @@
 import UIKit
 import CoreMedia
 
+protocol PlayerVCDelegate: AnyObject {
+    func didDismiss()
+}
+
 class PlayerVC: UIViewController {
 
     private let topImage = SGImageView(frame: .zero)
@@ -21,8 +25,10 @@ class PlayerVC: UIViewController {
     private let previousButton = SGButton(type: .previous)
     private let downloadButton = SGButton(type: .download)
     private let activityIndicator = UIActivityIndicatorView()
+    private let isSmallScreen = UIDevice.current.screenType == .iPhones_5_5s_5c_SE
     
     private var song: Song?
+    weak var delegate: PlayerVCDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +36,11 @@ class PlayerVC: UIViewController {
         configureDownloadButton()
         configureLayout()
         sliderObserver()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        delegate?.didDismiss()
     }
 
     private func configureViewController() {
@@ -76,8 +87,8 @@ class PlayerVC: UIViewController {
         NSLayoutConstraint.activate([
             topImage.topAnchor.constraint(equalTo: view.topAnchor, constant: 80),
             topImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            topImage.heightAnchor.constraint(equalToConstant: 220),
-            topImage.widthAnchor.constraint(equalToConstant: 220),
+            topImage.heightAnchor.constraint(equalToConstant: isSmallScreen ? 150 : 220),
+            topImage.widthAnchor.constraint(equalToConstant: isSmallScreen ? 150 : 220),
             
             downloadButton.topAnchor.constraint(equalTo: topImage.bottomAnchor, constant: 18),
             downloadButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),

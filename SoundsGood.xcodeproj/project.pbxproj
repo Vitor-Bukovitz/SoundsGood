@@ -16,6 +16,7 @@
 		8D42835D2611341D006263E2 /* YoutubeResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D42835C2611341D006263E2 /* YoutubeResult.swift */; };
 		8D428361261136F1006263E2 /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D428360261136F1006263E2 /* UIViewController+Ext.swift */; };
 		8D428366261140FB006263E2 /* SearchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D428365261140FB006263E2 /* SearchVC.swift */; };
+		8D4FDB4526267557003ADFF8 /* UIDevice+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4FDB4426267557003ADFF8 /* UIDevice+Ext.swift */; };
 		8D5038FD2612B4E20008BC57 /* PlayerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D5038FC2612B4E20008BC57 /* PlayerVC.swift */; };
 		8D55EED02612A12A008C8BB1 /* SongManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D55EECF2612A12A008C8BB1 /* SongManager.swift */; };
 		8D981DE4260EF36400F49C9F /* LocalStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D981DE3260EF36400F49C9F /* LocalStorageManager.swift */; };
@@ -42,6 +43,7 @@
 		8D42835C2611341D006263E2 /* YoutubeResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoutubeResult.swift; sourceTree = "<group>"; };
 		8D428360261136F1006263E2 /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 		8D428365261140FB006263E2 /* SearchVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVC.swift; sourceTree = "<group>"; };
+		8D4FDB4426267557003ADFF8 /* UIDevice+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Ext.swift"; sourceTree = "<group>"; };
 		8D5038FC2612B4E20008BC57 /* PlayerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerVC.swift; sourceTree = "<group>"; };
 		8D55EECF2612A12A008C8BB1 /* SongManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongManager.swift; sourceTree = "<group>"; };
 		8D981DE3260EF36400F49C9F /* LocalStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStorageManager.swift; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@
 			children = (
 				8D428360261136F1006263E2 /* UIViewController+Ext.swift */,
 				8DC4EA1926228D3200C8068F /* UIImage+Ext.swift */,
+				8D4FDB4426267557003ADFF8 /* UIDevice+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -302,6 +305,7 @@
 				8D04477C260EE01F002C2750 /* Colors.swift in Sources */,
 				8D981DE4260EF36400F49C9F /* LocalStorageManager.swift in Sources */,
 				8DC4A1F4260ADEFE00D12E97 /* AppDelegate.swift in Sources */,
+				8D4FDB4526267557003ADFF8 /* UIDevice+Ext.swift in Sources */,
 				8D55EED02612A12A008C8BB1 /* SongManager.swift in Sources */,
 				8DC4A1F6260ADEFE00D12E97 /* SceneDelegate.swift in Sources */,
 			);

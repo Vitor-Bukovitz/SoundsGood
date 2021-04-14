@@ -41,6 +41,7 @@ class HomeVC: UIViewController {
         view.addSubview(playerBar)
         
         playerBar.controller = self
+        playerBar.delegate = self
         NSLayoutConstraint.activate([
             playerBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             playerBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -85,7 +86,15 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
         let song = songs[indexPath.row]
         let destVC = PlayerVC()
         destVC.setSong(song: song)
-        let navControlelr = UINavigationController(rootViewController: destVC)
-        present(navControlelr, animated: true)
+        destVC.delegate = self
+        let navController = UINavigationController(rootViewController: destVC)
+        present(navController, animated: true)
+    }
+}
+
+extension HomeVC: PlayerVCDelegate {
+    
+    func didDismiss() {
+        getLocalSongs()
     }
 }
