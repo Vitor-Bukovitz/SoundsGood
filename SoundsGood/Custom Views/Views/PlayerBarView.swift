@@ -50,10 +50,6 @@ class PlayerBarView: UIView {
         skipButton.addTarget(self, action: #selector(skipButtonPressed), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 18),
-            titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            titleLabel.widthAnchor.constraint(equalToConstant: 200),
-            
             skipButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -18),
             skipButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             skipButton.heightAnchor.constraint(equalToConstant: 20),
@@ -68,6 +64,10 @@ class PlayerBarView: UIView {
             previousButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             previousButton.heightAnchor.constraint(equalToConstant: 20),
             previousButton.widthAnchor.constraint(equalToConstant: 20),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 18),
+            titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: previousButton.leadingAnchor, constant: -18),
         ])
     }
     

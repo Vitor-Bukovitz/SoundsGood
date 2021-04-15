@@ -14,6 +14,7 @@ protocol PlayerVCDelegate: AnyObject {
 
 class PlayerVC: UIViewController {
 
+    private let topImageView = UIView()
     private let topImage = SGImageView(frame: .zero)
     private let titleLabel = SGTitleLabel(textAlign: .left, fontSize: 18)
     private let authorLabel = SGBodyLabel()
@@ -25,7 +26,6 @@ class PlayerVC: UIViewController {
     private let previousButton = SGButton(type: .previous)
     private let downloadButton = SGButton(type: .download)
     private let activityIndicator = UIActivityIndicatorView()
-    private let isSmallScreen = UIDevice.current.screenType == .iPhones_5_5s_5c_SE
     
     private var song: Song?
     weak var delegate: PlayerVCDelegate?
@@ -57,6 +57,7 @@ class PlayerVC: UIViewController {
     }
     
     private func configureLayout() {
+        view.addSubview(topImageView)
         view.addSubview(topImage)
         view.addSubview(titleLabel)
         view.addSubview(downloadButton)
@@ -68,6 +69,7 @@ class PlayerVC: UIViewController {
         view.addSubview(skipButton)
         view.addSubview(previousButton)
         downloadButton.addSubview(activityIndicator)
+        topImageView.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         slider.translatesAutoresizingMaskIntoConstraints = false
         
@@ -83,45 +85,9 @@ class PlayerVC: UIViewController {
         previousButton.addTarget(self, action: #selector(previousButtonPressed), for: .touchUpInside)
         skipButton.addTarget(self, action: #selector(skipButtonPressed), for: .touchUpInside)
 
-        
+        let padding: CGFloat = 18
         NSLayoutConstraint.activate([
-            topImage.topAnchor.constraint(equalTo: view.topAnchor, constant: 80),
-            topImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            topImage.heightAnchor.constraint(equalToConstant: isSmallScreen ? 150 : 220),
-            topImage.widthAnchor.constraint(equalToConstant: isSmallScreen ? 150 : 220),
-            
-            downloadButton.topAnchor.constraint(equalTo: topImage.bottomAnchor, constant: 18),
-            downloadButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            downloadButton.widthAnchor.constraint(equalToConstant: 34),
-            downloadButton.heightAnchor.constraint(equalToConstant: 34),
-            
-            titleLabel.topAnchor.constraint(equalTo: downloadButton.bottomAnchor, constant: 18),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -18),
-            titleLabel.heightAnchor.constraint(equalToConstant: 24),
-            
-            authorLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            authorLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            authorLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-            authorLabel.heightAnchor.constraint(equalToConstant: 18),
-            
-            slider.topAnchor.constraint(equalTo: authorLabel.bottomAnchor, constant: 36),
-            slider.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            slider.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
-            slider.heightAnchor.constraint(equalToConstant: 12),
-            
-            currentTimeLabel.topAnchor.constraint(equalTo: slider.bottomAnchor, constant: 18),
-            currentTimeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            currentTimeLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
-            currentTimeLabel.heightAnchor.constraint(equalToConstant: 18),
-            
-            durationTimeLabel.topAnchor.constraint(equalTo: slider.bottomAnchor, constant: 18),
-            durationTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
-            durationTimeLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
-            durationTimeLabel.heightAnchor.constraint(equalToConstant: 18),
-            
-            
-            playButton.topAnchor.constraint(equalTo: currentTimeLabel.bottomAnchor, constant: 18),
+            playButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -padding),
             playButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             playButton.heightAnchor.constraint(equalToConstant: 68),
             playButton.widthAnchor.constraint(equalToConstant: 68),
@@ -140,6 +106,46 @@ class PlayerVC: UIViewController {
             activityIndicator.centerXAnchor.constraint(equalTo: downloadButton.centerXAnchor),
             activityIndicator.heightAnchor.constraint(equalTo: downloadButton.heightAnchor),
             activityIndicator.widthAnchor.constraint(equalTo: downloadButton.heightAnchor),
+            
+            slider.bottomAnchor.constraint(equalTo: playButton.topAnchor, constant: -36),
+            slider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
+            slider.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
+            slider.heightAnchor.constraint(equalToConstant: 12),
+            
+            currentTimeLabel.topAnchor.constraint(equalTo: slider.bottomAnchor, constant: padding),
+            currentTimeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            currentTimeLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
+            currentTimeLabel.heightAnchor.constraint(equalToConstant: padding),
+            
+            durationTimeLabel.topAnchor.constraint(equalTo: slider.bottomAnchor, constant: padding),
+            durationTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            durationTimeLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
+            durationTimeLabel.heightAnchor.constraint(equalToConstant: padding),
+            
+            downloadButton.bottomAnchor.constraint(equalTo: slider.topAnchor, constant: -36),
+            downloadButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            downloadButton.widthAnchor.constraint(equalToConstant: 34),
+            downloadButton.heightAnchor.constraint(equalToConstant: 34),
+            
+            titleLabel.topAnchor.constraint(equalTo: downloadButton.topAnchor, constant: -4),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
+            titleLabel.trailingAnchor.constraint(equalTo: downloadButton.leadingAnchor, constant: -padding),
+            titleLabel.heightAnchor.constraint(equalToConstant: 24),
+            
+            authorLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            authorLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            authorLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+            authorLabel.heightAnchor.constraint(equalToConstant: padding),
+            
+            topImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 80),
+            topImageView.bottomAnchor.constraint(equalTo: titleLabel.topAnchor,constant: -80),
+            topImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 36),
+            topImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -36),
+            
+            topImage.centerYAnchor.constraint(equalTo: topImageView.centerYAnchor),
+            topImage.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 36),
+            topImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -36),
+            topImage.heightAnchor.constraint(equalTo: topImage.widthAnchor),
         ])
     }
     
@@ -169,10 +175,11 @@ class PlayerVC: UIViewController {
                 if songs.contains(song) {
                     let ac = UIAlertController(title: "Delete song?", message: "Are you sure you want to delete this song?", preferredStyle: .alert)
                     ac.addAction(UIAlertAction(title: "Yes", style: .default, handler: self.deleteSong))
-                    ac.addAction(UIAlertAction(title: "No", style: .cancel))
-                    DispatchQueue.main.async {
-                        self.present(ac, animated: true)
-                    }
+                    ac.addAction(UIAlertAction(title: "No", style: .cancel, handler: { _ in
+                        self.activityIndicator.stopAnimating()
+                        self.downloadButton.toggleIcon(to: .downloaded)
+                    }))
+                    DispatchQueue.main.async { self.present(ac, animated: true) }
                 } else {
                     NetworkManager.shared.downloadSong(song: song) { [weak self] result in
                         guard let self = self else { return }
