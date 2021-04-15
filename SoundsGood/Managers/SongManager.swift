@@ -51,7 +51,15 @@ enum SongManager {
                     }
                 ]
             } else {
-                #warning("set placehodler image")
+                if let image = UIImage.placeholderImage {
+                    properties = [
+                        MPMediaItemPropertyArtist: currentSong.snippet.channelTitle,
+                        MPMediaItemPropertyTitle: currentSong.snippet.title,
+                        MPMediaItemPropertyArtwork: MPMediaItemArtwork(boundsSize: image.size) { _ -> UIImage in
+                            return image
+                        }
+                    ]
+                }
             }
         }
         setCommands(index: index)

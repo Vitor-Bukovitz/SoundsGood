@@ -40,4 +40,8 @@ extension UIImage {
     open class var downloadedIcon: UIImage? {
         return UIImage(named: "downloaded-icon")?.withRenderingMode(.alwaysOriginal)
     }
+    
+    open class var placeholderImage: UIImage? {
+        return UIImage(named: "placeholder-image")
+    }
 }

@@ -92,13 +92,7 @@ extension SearchVC: UITableViewDelegate, UITableViewDataSource {
 
 extension SearchVC: UISearchResultsUpdating, UISearchBarDelegate {
     
-    func updateSearchResults(for searchController: UISearchController) {
-    }
-
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-//        isSearching = false
-//        updateData(on: self.followers)
-    }
+    func updateSearchResults(for searchController: UISearchController) { return }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let filter = searchBar.text, !filter.isEmpty else { return }
