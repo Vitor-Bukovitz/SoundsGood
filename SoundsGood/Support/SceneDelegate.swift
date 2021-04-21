@@ -14,6 +14,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: Colors.darkPurpleColor]
         
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
@@ -33,8 +34,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func createSearchNC() -> UINavigationController {
         let searchVC = SearchVC()
-        searchVC.title = "Youtube Search"
-        searchVC.tabBarItem = UITabBarItem(title: "Youtube Search", image: UIImage.searchIcon, tag: 1)
+        searchVC.title = "Search"
+        searchVC.tabBarItem = UITabBarItem(title: "Search", image: UIImage.searchIcon, tag: 1)
         return UINavigationController(rootViewController: searchVC)
     }
 

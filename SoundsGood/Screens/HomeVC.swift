@@ -42,6 +42,7 @@ class HomeVC: UIViewController {
         
         playerBar.controller = self
         playerBar.delegate = self
+        NetworkManager.shared.delegate = self
         NSLayoutConstraint.activate([
             playerBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             playerBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -81,20 +82,51 @@ extension HomeVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        SongManager.configurePlayer(songs: songs)
-        SongManager.playSong(index: indexPath.row)
         let song = songs[indexPath.row]
-        let destVC = PlayerVC()
-        destVC.setSong(song: song)
-        destVC.delegate = self
-        let navController = UINavigationController(rootViewController: destVC)
-        present(navController, animated: true)
+        if song.status == .some(.downloaded) {
+            SongManager.configurePlayer(songs: songs.filter { $0.status == .some(.downloaded) } )
+            SongManager.playSong(index: indexPath.row)
+            let destVC = PlayerVC()
+            destVC.setSong(song: song)
+            destVC.delegate = self
+            let navController = UINavigationController(rootViewController: destVC)
+            present(navController, animated: true)
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let song = songs[indexPath.row]
+            songs.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            SongManager.deletePlayer()
+            LocalStorageManager.updateWithSong(song: song, actionType: .remove) { [weak self] error in
+                guard let self = self else { return }
+                if let error = error {
+                    self.presentAlertOnMainThread(title: "Someting went wrong", message: error.rawValue)
+                }
+            }
+        }
     }
 }
 
-extension HomeVC: PlayerVCDelegate {
+extension HomeVC: PlayerVCDelegate, NetworkManagerDelegate {
     
     func didDismiss() {
         getLocalSongs()
+    }
+    
+    func didDownloadedSong(for id: String) {
+        let filteredSongs = songs.filter { $0.id == id }
+        guard var song = filteredSongs.first else { return }
+        song.status = SongStatus.downloaded
+        LocalStorageManager.updateWithSong(song: song, actionType: .update) { [weak self] error in
+            guard let self = self else { return }
+            if let error = error {
+                self.presentAlertOnMainThread(title: "Something went wrong", message: error.rawValue)
+            } else {
+                self.getLocalSongs()
+            }
+        }
     }
 }

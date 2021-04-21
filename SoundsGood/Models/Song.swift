@@ -7,9 +7,15 @@
 
 import Foundation
 
+enum SongStatus: String, Codable {
+    case downloading
+    case downloaded
+}
+
 struct Song: Codable, Hashable {
     let snippet: Snippet
-    let id: Id
+    let id: String
+    var status: SongStatus?
 }
 
 struct Snippet: Codable, Hashable {
@@ -19,13 +25,10 @@ struct Snippet: Codable, Hashable {
 }
 
 struct Thumbnails: Codable, Hashable {
-    let medium: Medium
+    let high: High
 }
 
-struct Medium: Codable, Hashable {
+struct High: Codable, Hashable {
     let url: String
 }
 
-struct Id: Codable, Hashable {
-    let videoId: String?
-}

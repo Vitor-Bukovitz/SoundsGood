@@ -7,6 +7,7 @@
 
 import Foundation
 
-enum ApiKeys {
-    static let youtube = "AIzaSyBqQUruaUmZ45EJGcYxs2M71yLw6uZjEpw"
+enum Constants {
+    static let youtubeURL = "https://m.youtube.com/"
+    static let youtubeKey = "AIzaSyBqQUruaUmZ45EJGcYxs2M71yLw6uZjEpw"
 }

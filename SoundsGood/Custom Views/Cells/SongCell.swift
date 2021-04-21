@@ -10,9 +10,10 @@ import UIKit
 class SongCell: UITableViewCell {
     
     static let reuseID = "SongCell"
+    private let leadingImage = SGImageView(frame: .zero)
+    private let loadingIndicator = UIActivityIndicatorView()
     private let titleLabel = SGTitleLabel()
     private let authorLabel = SGBodyLabel()
-    private let leadingImage = SGImageView(frame: .zero)
     
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -27,14 +28,34 @@ class SongCell: UITableViewCell {
     func set(song: Song) {
         titleLabel.text = song.snippet.title
         authorLabel.text = song.snippet.channelTitle
-        leadingImage.setRemoteImage(url: song.snippet.thumbnails.medium.url)
+        leadingImage.setRemoteImage(url: song.snippet.thumbnails.high.url)
+        
+        switch song.status {
+        case .downloaded:
+            loadingIndicator.stopAnimating()
+            leadingImage.isHidden = false
+            titleLabel.textColor = .black
+            authorLabel.textColor = .black
+            backgroundColor = .clear
+        default:
+            loadingIndicator.startAnimating()
+            leadingImage.isHidden = true
+            titleLabel.textColor = .secondaryLabel
+            authorLabel.textColor = .tertiaryLabel
+            backgroundColor = .systemGray6
+        }
     }
     
     private func configure() {
         addSubview(titleLabel)
         addSubview(authorLabel)
         addSubview(leadingImage)
+        addSubview(loadingIndicator)
         selectionStyle = .none
+        
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.color = Colors.purpleColor
         
         let outerPadding: CGFloat = 24
         let innerPadding: CGFloat = 12
@@ -44,6 +65,11 @@ class SongCell: UITableViewCell {
             leadingImage.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             leadingImage.heightAnchor.constraint(equalToConstant: 35),
             leadingImage.widthAnchor.constraint(equalToConstant: 35),
+            
+            loadingIndicator.centerYAnchor.constraint(equalTo: leadingImage.centerYAnchor),
+            loadingIndicator.centerXAnchor.constraint(equalTo: leadingImage.centerXAnchor),
+            loadingIndicator.heightAnchor.constraint(equalTo: leadingImage.heightAnchor),
+            loadingIndicator.widthAnchor.constraint(equalTo: leadingImage.widthAnchor),
             
             titleLabel.topAnchor.constraint(equalTo: leadingImage.topAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: leadingImage.trailingAnchor, constant: innerPadding),

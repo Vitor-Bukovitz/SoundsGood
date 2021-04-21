@@ -6,105 +6,107 @@
 //
 
 import UIKit
-import MediaPlayer
+import WebKit
 
 class SearchVC: UIViewController {
     
-    private let tableView = UITableView()
-    private let playerBar = PlayerBarView()
-    private var songs = [Song]()
-
+    private let webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
+    private let downloadButton = UIButton(type: .system)
+    private let loadingView = UIActivityIndicatorView()
+    private var currentDownloadURL: URL?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.prefersLargeTitles = true
-        view.backgroundColor = Colors.whiteColor
-        configureSearchController()
-        configureTableVC()
-        configurePlayerBar()
-    }
-
-    private func configureTableVC() {
-        view.addSubview(tableView)
-
-        tableView.frame = view.bounds
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.rowHeight = 60
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 64, right: 0)
-        tableView.register(SongCell.self, forCellReuseIdentifier: SongCell.reuseID)
+        configureView()
+        configureWebview()
+        configureLoadingView()
     }
     
-    private func configurePlayerBar() {
-        view.addSubview(playerBar)
+    private func configureView() {
+        view.backgroundColor = Colors.whiteColor
+        navigationItem.title = Constants.youtubeURL
         
-        playerBar.controller = self
+        downloadButton.isEnabled = false
+        downloadButton.setImage(UIImage(), for: .normal)
+        downloadButton.addTarget(self, action: #selector(downloadButtonPressed), for: .touchUpInside)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: downloadButton)
+    }
+    
+    private func configureLoadingView() {
+        downloadButton.addSubview(loadingView)
+        
+        loadingView.translatesAutoresizingMaskIntoConstraints = false
+        loadingView.color = Colors.darkPurpleColor
+        loadingView.hidesWhenStopped = true
         NSLayoutConstraint.activate([
-            playerBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            playerBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            playerBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            playerBar.heightAnchor.constraint(equalToConstant: 64),
+            loadingView.widthAnchor.constraint(equalTo: downloadButton.widthAnchor),
+            loadingView.heightAnchor.constraint(equalTo: downloadButton.heightAnchor),
+            loadingView.centerYAnchor.constraint(equalTo: downloadButton.centerYAnchor),
+            loadingView.centerXAnchor.constraint(equalTo: downloadButton.centerXAnchor),
         ])
     }
     
-    private func configureSearchController() {
-        let searchController = UISearchController()
-        searchController.searchResultsUpdater = self
-        searchController.searchBar.delegate = self
-        searchController.searchBar.placeholder = "Search for a song"
-        searchController.obscuresBackgroundDuringPresentation = false
-        navigationItem.searchController = searchController
-    }
     
-    
-    private func updateData(songs: [Song]) {
-        DispatchQueue.main.async {
-            self.songs = songs
-            self.tableView.reloadData()
+    private func configureWebview() {
+        view.addSubview(webView)
+        if let url = URL(string: Constants.youtubeURL) {
+            webView.load(URLRequest(url: url))
         }
-    }
-}
-
-extension SearchVC: UITableViewDelegate, UITableViewDataSource {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return songs.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: SongCell.reuseID) as? SongCell else {
-            return UITableViewCell()
-        }
-        let song = songs[indexPath.row]
-        cell.set(song: song)
-        return cell
+        webView.uiDelegate = self
+        webView.navigationDelegate = self
+        webView.allowsBackForwardNavigationGestures = true
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        webView.addObserver(self, forKeyPath: "URL", options: [.new, .old], context: nil)
+        
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+        ])
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        SongManager.configurePlayer(songs: songs)
-        SongManager.playSong(index: indexPath.row)
-        let song = songs[indexPath.row]
-        let destVC = PlayerVC()
-        destVC.setSong(song: song)
-        let navControlelr = UINavigationController(rootViewController: destVC)
-        present(navControlelr, animated: true)
-    }
-}
-
-extension SearchVC: UISearchResultsUpdating, UISearchBarDelegate {
-    
-    func updateSearchResults(for searchController: UISearchController) { return }
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let filter = searchBar.text, !filter.isEmpty else { return }
-        NetworkManager.shared.searchSong(song: filter) { [weak self] result in
+    @objc private func downloadButtonPressed() {
+        guard let downloadURL = currentDownloadURL else { return }
+        guard let youtubeURL = webView.url?.absoluteString else { return }
+        NetworkManager.shared.downloadSong(for: youtubeURL, with: downloadURL) { [weak self] error in
             guard let self = self else { return }
-            switch result {
-            case .success(let songs):
-                self.updateData(songs: songs)
-            case .failure(let error):
+            if let error = error {
                 self.presentAlertOnMainThread(title: "Something went wrong", message: error.rawValue)
+            } else {
+                DispatchQueue.main.async {
+                    self.downloadButton.isEnabled = false
+                    self.downloadButton.setImage(UIImage(), for: .normal)
+                    let ac = UIAlertController(title: "Your song is being downloaded!", message: "Hang tight while your song is being downloaded! Soon it will be avaiable to play!", preferredStyle: .alert)
+                    ac.addAction(UIAlertAction(title: "Ok", style: .default))
+                    self.present(ac, animated: true)
+                }
             }
         }
     }
 }
 
+extension SearchVC: WKUIDelegate, WKNavigationDelegate {
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?,
+        change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        loadingView.startAnimating()
+        downloadButton.isEnabled = false
+        downloadButton.setImage(UIImage(), for: .normal)
+        guard let url = webView.url else { return }
+        navigationItem.title = url.absoluteString
+        NetworkManager.shared.canDownload(video: url.absoluteString) { [weak self] downloadURL in
+            guard let self = self else { return }
+            guard let downloadURL = downloadURL else {
+                return DispatchQueue.main.async { self.loadingView.stopAnimating() }
+            }
+            guard let url = URL(string: downloadURL) else { return }
+            DispatchQueue.main.async {
+                self.currentDownloadURL = url
+                self.loadingView.stopAnimating()
+                self.downloadButton.isEnabled = true
+                self.downloadButton.setImage(UIImage.downloadIcon, for: .normal)
+            }
+        }
+    }
+}

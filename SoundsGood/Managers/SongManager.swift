@@ -14,7 +14,6 @@ protocol SongManagerDelegate: AnyObject {
 }
 
 enum SongManager {
-    static private let baseUrl = "https://vitorbukovitz.pythonanywhere.com/song/"
     static var player: AVPlayer?
     static var songs: [Song]?
     static var properties: [String: Any]?
@@ -26,21 +25,15 @@ enum SongManager {
         guard let songs = songs else { return }
         let currentSong = songs[index]
         currentIndex = index
-    
-        let localUrl = LocalStorageManager.getLocalSongURL(song: currentSong)
-        if let localUrl = localUrl {
-            player = AVPlayer(url: localUrl)
-        } else {
-            guard let videoId = currentSong.id.videoId else { return }
-            guard let url = URL(string: baseUrl + videoId) else { return }
-            player = AVPlayer(url: url)
-        }
+        
+        guard let localUrl = LocalStorageManager.getLocalSongURL(song: currentSong) else { return }
+        player = AVPlayer(url: localUrl)
         player?.volume = 1.0
         player?.play()
         automaticallyPlayNext()
         
         UIApplication.shared.beginReceivingRemoteControlEvents()
-        NetworkManager.shared.downloadImage(from: currentSong.snippet.thumbnails.medium.url) { image in
+        NetworkManager.shared.downloadImage(from: currentSong.snippet.thumbnails.high.url) { image in
             updateBackgroundStatus()
             if let image = image {
                 properties = [
@@ -73,13 +66,13 @@ enum SongManager {
     static func playNext() -> Song? {
         guard currentIndex + 1 < songs?.count ?? 0 else { return nil }
         playSong(index: currentIndex + 1)
-        return songs?[currentIndex + 1]
+        return songs?[currentIndex]
     }
     
     static func playPrevious() -> Song? {
-        guard currentIndex - 1 > 0 else { return nil }
+        guard currentIndex > 0 else { return nil }
         playSong(index: currentIndex - 1)
-        return songs?[currentIndex - 1]
+        return songs?[currentIndex]
     }
     
     static func canPlayPrevious() -> Bool {
@@ -96,7 +89,7 @@ enum SongManager {
     }
     
     static func totalSeconds() -> Double {
-        let result = (player?.currentItem?.duration.seconds ?? 1) / 2
+        let result = player?.currentItem?.duration.seconds ?? 1
         return result > 0 ? result : 1
     }
     
@@ -130,6 +123,16 @@ enum SongManager {
             }
             return .commandFailed
         }
+    }
+    
+    static func deletePlayer() {
+        self.songs = []
+        self.player = nil
+        try? AVAudioSession.sharedInstance().setActive(false)
+        let commandCenter = MPRemoteCommandCenter.shared()
+        commandCenter.playCommand.isEnabled = false
+        commandCenter.pauseCommand.isEnabled = false
+        commandCenter.changePlaybackPositionCommand.isEnabled = false
     }
     
     private static func updateBackgroundStatus() {
@@ -168,7 +171,11 @@ enum SongManager {
             let currentSeconds = self.currentSeconds()
             let totalSeconds = self.totalSeconds()
             if currentSeconds > totalSeconds {
-                guard let song = playNext() else { return }
+                guard let song = playNext() else {
+                    player?.pause()
+                    player?.seek(to: CMTime(seconds: 0, preferredTimescale: 60))
+                    return
+                }
                 delegate?.onNextSong(nextSong: song)
             }
         })

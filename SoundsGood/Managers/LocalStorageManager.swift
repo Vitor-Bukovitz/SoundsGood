@@ -8,7 +8,7 @@
 import Foundation
 
 enum LocalStorageActionType {
-    case add, remove
+    case add, remove, update
 }
 
 enum LocalStorageManager {
@@ -31,8 +31,14 @@ enum LocalStorageManager {
                     }
                     retrieveSongs.append(song)
                 case .remove:
-                    retrieveSongs.removeAll {$0.id.videoId == song.id.videoId}
+                    retrieveSongs.removeAll {$0.id == song.id}
                     deleteSong(song: song)
+                case .update:
+                    retrieveSongs.removeAll {$0.id == song.id}
+                    guard !retrieveSongs.contains(song) else {
+                        return completed(SGError.alreadySaved)
+                    }
+                    retrieveSongs.append(song)
                 }
                 completed(saveSongs(song: retrieveSongs))
             case .failure(let error):
@@ -64,9 +70,9 @@ enum LocalStorageManager {
     }
     
     static func getLocalSongURL(song: Song) -> URL? {
-        guard let videoid = song.id.videoId else { return nil }
+        let videoid = song.id
         guard let documentPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.allDomainsMask, true).first else { return nil }
-        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp4") as String
+        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp3") as String
         if FileManager.default.fileExists(atPath: destPath) {
             return URL(fileURLWithPath: destPath)
         }
@@ -74,9 +80,9 @@ enum LocalStorageManager {
     }
     
     static func deleteSong(song: Song) {
-        guard let videoid = song.id.videoId else { return }
+        let videoid = song.id
         guard let documentPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.allDomainsMask, true).first else { return }
-        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp4") as String
+        let destPath = NSString(string: documentPath).appendingPathComponent("\(videoid).mp3") as String
         try? FileManager.default.removeItem(atPath: destPath)
     }
 }

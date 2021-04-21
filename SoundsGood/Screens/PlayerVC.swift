@@ -24,8 +24,6 @@ class PlayerVC: UIViewController {
     private let playButton = SGButton(type: .pause)
     private let skipButton = SGButton(type: .skip)
     private let previousButton = SGButton(type: .previous)
-    private let downloadButton = SGButton(type: .download)
-    private let activityIndicator = UIActivityIndicatorView()
     
     private var song: Song?
     weak var delegate: PlayerVCDelegate?
@@ -33,7 +31,6 @@ class PlayerVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
-        configureDownloadButton()
         configureLayout()
         sliderObserver()
     }
@@ -53,14 +50,13 @@ class PlayerVC: UIViewController {
         self.song = song
         titleLabel.text = song.snippet.title
         authorLabel.text = song.snippet.channelTitle
-        topImage.setRemoteImage(url: song.snippet.thumbnails.medium.url)
+        topImage.setRemoteImage(url: song.snippet.thumbnails.high.url)
     }
     
     private func configureLayout() {
         view.addSubview(topImageView)
         view.addSubview(topImage)
         view.addSubview(titleLabel)
-        view.addSubview(downloadButton)
         view.addSubview(authorLabel)
         view.addSubview(slider)
         view.addSubview(currentTimeLabel)
@@ -68,9 +64,7 @@ class PlayerVC: UIViewController {
         view.addSubview(playButton)
         view.addSubview(skipButton)
         view.addSubview(previousButton)
-        downloadButton.addSubview(activityIndicator)
         topImageView.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         slider.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.numberOfLines = 1
@@ -78,9 +72,6 @@ class PlayerVC: UIViewController {
         currentTimeLabel.text = "00:00"
         durationTimeLabel.text = "00:00"
         durationTimeLabel.textAlignment = .right
-        activityIndicator.color = Colors.purpleColor
-        activityIndicator.hidesWhenStopped = true
-        downloadButton.addTarget(self, action: #selector(downloadButtonPressed), for: .touchUpInside)
         playButton.addTarget(self, action: #selector(playButtonPressed), for: .touchUpInside)
         previousButton.addTarget(self, action: #selector(previousButtonPressed), for: .touchUpInside)
         skipButton.addTarget(self, action: #selector(skipButtonPressed), for: .touchUpInside)
@@ -102,11 +93,6 @@ class PlayerVC: UIViewController {
             skipButton.heightAnchor.constraint(equalToConstant: 34),
             skipButton.widthAnchor.constraint(equalToConstant: 34),
             
-            activityIndicator.centerYAnchor.constraint(equalTo: downloadButton.centerYAnchor),
-            activityIndicator.centerXAnchor.constraint(equalTo: downloadButton.centerXAnchor),
-            activityIndicator.heightAnchor.constraint(equalTo: downloadButton.heightAnchor),
-            activityIndicator.widthAnchor.constraint(equalTo: downloadButton.heightAnchor),
-            
             slider.bottomAnchor.constraint(equalTo: playButton.topAnchor, constant: -36),
             slider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
             slider.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
@@ -122,14 +108,9 @@ class PlayerVC: UIViewController {
             durationTimeLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
             durationTimeLabel.heightAnchor.constraint(equalToConstant: padding),
             
-            downloadButton.bottomAnchor.constraint(equalTo: slider.topAnchor, constant: -36),
-            downloadButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
-            downloadButton.widthAnchor.constraint(equalToConstant: 34),
-            downloadButton.heightAnchor.constraint(equalToConstant: 34),
-            
-            titleLabel.topAnchor.constraint(equalTo: downloadButton.topAnchor, constant: -4),
+            titleLabel.bottomAnchor.constraint(equalTo: slider.topAnchor, constant: -36),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-            titleLabel.trailingAnchor.constraint(equalTo: downloadButton.leadingAnchor, constant: -padding),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
             titleLabel.heightAnchor.constraint(equalToConstant: 24),
             
             authorLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
@@ -147,70 +128,6 @@ class PlayerVC: UIViewController {
             topImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -36),
             topImage.heightAnchor.constraint(equalTo: topImage.widthAnchor),
         ])
-    }
-    
-    private func configureDownloadButton() {
-        LocalStorageManager.retrieveSongs { [weak self] result in
-            guard let self = self else { return }
-            guard let song = self.song else { return }
-            switch result {
-            case .success(let songs):
-                if songs.contains(song) {
-                    self.downloadButton.toggleIcon(to: .downloaded)
-                }
-            default:
-                return
-            }
-        }
-    }
-    
-    @objc private func downloadButtonPressed() {
-        guard let song = song else { return }
-        downloadButton.setImage(UIImage(), for: .normal)
-        activityIndicator.startAnimating()
-        LocalStorageManager.retrieveSongs { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let songs):
-                if songs.contains(song) {
-                    let ac = UIAlertController(title: "Delete song?", message: "Are you sure you want to delete this song?", preferredStyle: .alert)
-                    ac.addAction(UIAlertAction(title: "Yes", style: .default, handler: self.deleteSong))
-                    ac.addAction(UIAlertAction(title: "No", style: .cancel, handler: { _ in
-                        self.activityIndicator.stopAnimating()
-                        self.downloadButton.toggleIcon(to: .downloaded)
-                    }))
-                    DispatchQueue.main.async { self.present(ac, animated: true) }
-                } else {
-                    NetworkManager.shared.downloadSong(song: song) { [weak self] result in
-                        guard let self = self else { return }
-                        switch result {
-                        case .success(_):
-                            DispatchQueue.main.async {
-                                self.activityIndicator.stopAnimating()
-                                self.downloadButton.toggleIcon(to: .downloaded)
-                            }
-                            self.presentAlertOnMainThread(title: "Sucess", message: "Song saved successfully 🎉")
-                        case .failure(let error):
-                            self.presentAlertOnMainThread(title: "Something went wrong", message: error.rawValue)
-                        }
-                    }
-                }
-            default:
-                return
-            }
-        }
-    }
-    
-    @objc private func deleteSong(_ sender: UIAlertAction) {
-        guard let song = song else { return }
-        LocalStorageManager.updateWithSong(song: song, actionType: .remove) { [weak self] error in
-            guard let self = self else { return }
-            if let error = error {
-                self.presentAlertOnMainThread(title: "Something went wrong", message: error.rawValue)
-            } else {
-                self.dismiss(animated: true)
-            }
-        }
     }
     
     @objc private func playButtonPressed() {
@@ -254,14 +171,8 @@ class PlayerVC: UIViewController {
             let totalSeconds = SongManager.totalSeconds()
             self.slider.setValue(Float((round(currentSeconds) / round(totalSeconds))), animated: true)
             
-            let currentSecondsText = self.formatNumber(value: currentSeconds, type: .seconds)
-            let currentMinutesText = self.formatNumber(value: currentSeconds, type: .minutes)
-            self.currentTimeLabel.text = "\(currentMinutesText):\(currentSecondsText)"
-            
-            
-            let totalSecondsText = self.formatNumber(value: totalSeconds, type: .seconds)
-            let totalMinutesText = self.formatNumber(value: totalSeconds, type: .minutes)
-            self.durationTimeLabel.text = "\(totalMinutesText):\(totalSecondsText)"
+            self.currentTimeLabel.text = currentSeconds.asString(style: .positional)
+            self.durationTimeLabel.text = totalSeconds.asString(style: .positional)
         })
     }
     
@@ -288,30 +199,12 @@ class PlayerVC: UIViewController {
     private func onSliderChanged(action: UIAction) {
         let totalSeconds = SongManager.totalSeconds()
         let selectedSeconds = round(totalSeconds * Double(slider.value))
-        let currentSecondsText = formatNumber(value: selectedSeconds, type: .seconds)
-        let currentMinutesText = formatNumber(value: selectedSeconds, type: .minutes)
-        self.currentTimeLabel.text = "\(currentMinutesText):\(currentSecondsText)"
+        self.currentTimeLabel.text = selectedSeconds.asString(style: .positional)
     }
     
     private enum NumberType {
         case seconds
         case minutes
-    }
-    
-    private func formatNumber(value: Double, type: NumberType) -> String {
-        var roundedValue: Double = 00
-        switch type {
-        case .seconds:
-            roundedValue = round(Double(Int(value) % 60))
-        case .minutes:
-            roundedValue = round(Double(Int(value / 60) % 60))
-        }
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumIntegerDigits = 2
-        formatter.minimumIntegerDigits = 2
-        let formattedAmount = formatter.string(from: roundedValue as NSNumber)
-        return String(formattedAmount ?? "00")
     }
 
     @objc private func dismissVC() {
