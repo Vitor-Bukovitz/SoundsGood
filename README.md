@@ -8,4 +8,4 @@ Swift app made with UIKit that fetches youtube videos, play it on your device ev
 
 ## 📱 - Screenshots
 
-<a href="https://ibb.co/M8bgkWJ"><img src="https://i.ibb.co/tZSHpk1/merge-from-ofoct.jpg" alt="merge-from-ofoct" border="0"></a>
+<a href="https://ibb.co/K2f7HtW"><img src="https://i.ibb.co/T47R5Qt/merge-from-ofoct.jpg" alt="merge-from-ofoct" border="0"></a>
